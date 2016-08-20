@@ -3,7 +3,7 @@
 Quick installation 
 ============================
 
-1. Install MariaDB, see installation instructions accord. distrubution
+Install MariaDB, see installation instructions accord. distrubution
 
 ```
 yaourt mariadb
@@ -22,7 +22,7 @@ SHOW DATABASES;
 USE magnetsdb;
 ```
 
-2. Import sample of  the database 
+Import sample of  the database 
 
 Mirrors
 
@@ -34,8 +34,8 @@ https://dl.dropbox.com/s/a4ls2kvvqa2qvbl/magnetsdb.sql.gz
 
 https://mega.nz/#!sclGTBRL!Sr21vgf6F_jmdkoHJVk_C0ApjzozLE0UKjpowx6s9QA
 
-3. Install and configure Apache and PHP.
+Install and configure Apache and PHP.
 
-4. Edit configuration of the connection at `magnetsdb.php`
+Edit configuration of the connection at `magnetsdb.php`
 
-5. Launch server and open /magnetsdb. 
+Launch server and open /magnetsdb. 
