@@ -191,8 +191,11 @@ return $t;
     function main(){
         $result = "";
         $titles = array('index'=>'Поиск', 'search'=>'Найдено');
-        $title = $titles['action'];
+        
         $action = getAction();
+        
+        $title = $titles[$action];
+        
         $pattern = '';
         
         if ($action == 'search'){

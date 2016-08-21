@@ -20,6 +20,7 @@ In database shell:
 CREATE DATABASE `magnetsdb` CHARACTER SET utf8  COLLATE utf8_general_ci;
 SHOW DATABASES;
 USE magnetsdb;
+SOURCE path/to/data.sql
 ```
 
 Import sample of  the database 
