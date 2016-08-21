@@ -117,7 +117,7 @@ return $html;
         $table = $table . '</thead>';
         $table = $table . '<tbody>';
         
-        $count = count($array);
+        $count = count($arr);
         foreach ($arr as $key => $elem){
             
             $magnet = $elem['hash'];
