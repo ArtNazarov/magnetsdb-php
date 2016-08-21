@@ -26,9 +26,31 @@ return $html;
         );
     }
     
-    function request($field, $pattern, $page){
+    /*
+    * $patterns = array('caption' => '...', 'labels' => ..., ...);
+    */
+    function patterns_to_sql($patterns){
+			$sql = "";			
+			foreach ($patterns as $field => $pattern){
+				
+				
+				if ($sql != "") {
+						$sql = $sql . "AND ($field LIKE '%$pattern%')";
+				}
+				else
+				{
+				$sql = "($field LIKE '%$pattern%')";
+				};
+				
+			};
+			
+			return $sql;
+			
+    }
+    
+    function request($patterns, $page){
         
-    if ($pattern == ""){
+    if (($patterns['caption'] == "")&&($patterns['category'] == "")&&($patterns['labels'] == "")){
         return array('total' => 0,
               'fetch' => array()
               );
@@ -45,12 +67,17 @@ return $html;
 
     $connection = mysqli_connect($cfg['host'], $cfg['user'], $cfg['pass'], $cfg['db'], $cfg['port']);
     
-    $query = "SELECT count(*) as cnt FROM data WHERE $field LIKE '%$pattern%';";
+    $like_expr = patterns_to_sql($patterns);
+    
+    $query = "SELECT count(*) as cnt FROM data WHERE $like_expr;";
+    
     $result = mysqli_query($connection, $query);  
     $row = mysqli_fetch_assoc($result);
     $cnt = $row['cnt'];
+    
+    
      
-    $query = "SELECT * FROM data WHERE $field LIKE '%$pattern%' LIMIT $limit OFFSET $offset;";
+    $query = "SELECT * FROM data WHERE $like_expr LIMIT $limit OFFSET $offset;";
     
     
     
@@ -87,14 +114,30 @@ return $html;
     return $action;
     }
     
-    function onIndex($pattern){
-        $str = "<form name='searchForm' id='searchForm' action='/magnetsdb.php' method='POST'>";
+    function onIndex($patterns){
+        $str = "<div style='padding:10px'><form name='searchForm' id='searchForm' action='/magnetsdb.php' method='POST'>";
         $str = $str . "<input type='hidden' name='action' id='action' value='search'>";
         $str = $str . "<input type='hidden' name='page' id='page' value='1'>";
-        $str = $str . '<div class="mdl-textfield mdl-js-textfield">';        
-        $str = $str . '<input class="mdl-textfield__input" type="text" name="pattern" id="pattern" value="'.$pattern.'">';
-        $str = $str . '<label class="mdl-textfield__label" for="pattern">Pattern...</label></div>';
-        $str = $str . "<input class='mdl-button mdl-js-button mdl-button--raised mdl-button--colored' type='submit' value='Search'></form><hr/>";
+        $str = $str . "<h3>MagnetsDB</h3>";
+        
+        $str = $str . "<div style='margin-top:30px'>";
+        
+        $str = $str . 'Caption:<input class="mdl-textfield__input" type="text" name="caption" id="caption" value="'.$patterns['caption'].'">';
+        
+        
+        
+        $str = $str . 'Labels:<input class="mdl-textfield__input" type="text" name="labels" id="labels" value="'.$patterns['labels'].'">';
+        
+        
+        
+        $str = $str . 'Category:<input class="mdl-textfield__input" type="text" name="category" id="category" value="'.$patterns['category'].'">';
+        
+        $str = $str . "</div>";
+        
+        $str = $str . "<input style='margin-top:30px' class='mdl-button mdl-js-button mdl-button--raised mdl-button--colored' type='submit' value='Search'></form>";
+        
+        $str = $str . "</div><hr/>";
+        
         return $str;
     }
         
@@ -139,7 +182,10 @@ return $html;
         return $html;
     }
     
-    function script($pattern){
+    function script($patterns){
+$caption = $patterns['caption'];    
+$labels = $patterns['labels'];
+$category = $patterns['category'];
 return <<<EOT
 <script>
 window.onload = function(){   
@@ -149,7 +195,9 @@ for (var e in elems){
         elems[e].onclick = function(elems, e){
             return function(){            
             document.getElementById("page").value = elems[e].dataset['page'];
-            document.getElementById("pattern").value = '$pattern';
+            document.getElementById("category").value = '$category';
+            document.getElementById("caption").value = '$caption';
+            document.getElementById("labels").value = '$labels';
             document.getElementById("searchForm").submit();
             };
         }(elems, e);
@@ -181,10 +229,10 @@ $t = $t . '</div>';
 return $t;
     }
     
-    function document($pattern, $title,  $body){
+    function document($patterns, $title,  $body){
         $includes = includes();
         $mdl = "<div class='mdl-layout mdl-js-layout'>$body</div>";
-        $script = script($pattern);
+        $script = script($patterns);
         return "<html><head>$includes<title>$title</title><body>$mdl $script</body></html>";
     }
     
@@ -196,34 +244,42 @@ return $t;
         
         $title = $titles[$action];
         
-        $pattern = '';
+        $patterns = array(
+					'category' => '',
+					'caption' => '',
+					'labels' => ''
+        );
         
         if ($action == 'search'){
-              $pattern = $_POST['pattern'];
+              
+              $patterns['caption'] = $_POST['caption'];
+              $patterns['category'] = $_POST['category'];
+              $patterns['labels'] = $_POST['labels'];
+              
               $page = 1;
               if (isset($_POST['page'])){
                      $page = $_POST['page'];
                     };              
-            $title = $title . $pattern . ' ' . $page;
+            $title = $title . $patterns['caption'] . ' ' . $page;
         };
         
         switch ($action){
             case 'index' : {
                     
-                $result = onIndex($pattern); 
+                $result = onIndex($patterns); 
                 break;
             
             }
             case 'search' : {
                       
-                        $rows = request('caption', $pattern, $page);
+                        $rows = request($patterns, $page);
                         $view = onSearch($rows['fetch']); 
-                        $result = onIndex($pattern) . $view . pagination($rows['total']) . '<br/>Total:' . $rows['total'];
+                        $result = onIndex($patterns) . $view . pagination($rows['total']) . '<br/>Total:' . $rows['total'];
                         break;
                     
             };
         };
-        echo document($pattern, $titles[$action], mdl_template($title, $result));
+        echo document($patterns, $titles[$action], mdl_template($title, $result));
 
     }
     
