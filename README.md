@@ -26,9 +26,9 @@ Import sample of  the database
 
 Mirrors
 
-https://dl.dropbox.com/s/hkms2r0ob1yo0vb/data.sql.gz
+https://dl.dropbox.com/s/mvpltkb9slh2b0w/data.sql.zip
 
-https://mega.nz/#!BBVWwLzS!HTt1MmHF-h5AUMOoAiyfuZ8xSSzHqdVVJr2pGSeChQo
+https://mega.nz/#!ZI0BHR4L!LgSSt2ln32wEG2VTZIufaL8USOLZNDU3ODspqdUoGcs
 
 https://dl.dropbox.com/s/a4ls2kvvqa2qvbl/magnetsdb.sql.gz
 
