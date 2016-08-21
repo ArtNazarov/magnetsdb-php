@@ -1,5 +1,7 @@
 <?php 
 
+mb_internal_encoding("UTF-8");
+mb_http_output ("UTF-8");
 
     function includes(){
 $html = '<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">';
@@ -66,6 +68,8 @@ return $html;
     
 
     $connection = mysqli_connect($cfg['host'], $cfg['user'], $cfg['pass'], $cfg['db'], $cfg['port']);
+    
+    mysqli_set_charset($connection, "utf8");
     
     $like_expr = patterns_to_sql($patterns);
     
@@ -283,6 +287,7 @@ return $t;
 
     }
     
+   header('Content-Type: text/html; charset=utf-8');   
    main();
     
    
