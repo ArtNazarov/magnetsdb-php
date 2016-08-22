@@ -40,3 +40,28 @@ Install and configure Apache and PHP.
 Edit configuration of the connection at `magnetsdb.php`
 
 Launch server and open /magnetsdb. 
+
+Expressions
+===========
+
+1. Comma ```,``` is equivalent of AND operation
+
+	```test,other``` transforms to ```someth LIKE '%test%' 
+AND 
+someth like 
+'%other%'```
+
+2. Char ```?``` after comma change AND operator to OR
+
+	```test,?other``` transforms to ```(someth LIKE 
+'%test%') 
+OR 
+(someth like '%other%')```
+
+3. Char `-` add NOT condition
+
+	```-test,-other``` transforms to ```(NOT someth LIKE 
+'%test%') AND (NOT someth LIKE '%other%')```
+
+So, to find by pattern1 or pattern2 and exclude pattern3 you 
+must use ```pattern1,?pattern2,-pattern3```
