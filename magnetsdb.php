@@ -3,6 +3,49 @@
 mb_internal_encoding("UTF-8");
 mb_http_output ("UTF-8");
 
+function nao_prefix($field, $word, $flag){
+    
+	$nt = "";
+	$k = 0;
+        
+	if ($word[$k] === "-"){
+		$nt = " NOT ";
+		$k = 1;
+	};
+	
+                    
+        $oper = " AND "; // , as PROLOG
+        if ($word[$k] === "?"){
+                $k = $k+1; 
+		$oper = " OR ";                
+        };
+                
+        if (!$flag){                  
+            $oper = "";
+	};
+
+	$v = substr($word, $k);
+	
+	return " $oper ( $nt $field LIKE '%$v%' )";
+}
+
+function like_expr_comb($field, $req){
+
+$words = explode(",", $req);
+$result = "";
+foreach ($words as $k => $word){
+	if ($result!=""){
+		$result = $result . nao_prefix($field, $word, true);
+	}
+	else {
+		$result = $result . nao_prefix($field, $word, false);
+	};
+};
+
+return $result;
+
+};
+
     function includes(){
 $html = '<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">';
 $html = $html . '<link rel="stylesheet" href="https://code.getmdl.io/1.2.0/material.indigo-pink.min.css">';
@@ -35,13 +78,14 @@ return $html;
 			$sql = "";			
 			foreach ($patterns as $field => $pattern){
 				
-				
+                                $expr = like_expr_comb($field, $pattern);
+                            
 				if ($sql != "") {
-						$sql = $sql . "AND ($field LIKE '%$pattern%')";
+						$sql = $sql . "AND ( $expr )";
 				}
 				else
 				{
-				$sql = "($field LIKE '%$pattern%')";
+				$sql = "( $expr )";
 				};
 				
 			};
@@ -119,7 +163,8 @@ return $html;
     }
     
     function onIndex($patterns){
-        $str = "<div style='padding:10px'><form name='searchForm' id='searchForm' action='/magnetsdb.php' method='POST'>";
+        $str = "<div style='padding:10px'><form name='searchForm' id='searchForm' action='/index.php' 
+method='POST'>";
         $str = $str . "<input type='hidden' name='action' id='action' value='search'>";
         $str = $str . "<input type='hidden' name='page' id='page' value='1'>";
         $str = $str . "<h3>MagnetsDB</h3>";
