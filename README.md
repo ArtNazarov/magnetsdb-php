@@ -65,3 +65,7 @@ OR
 
 So, to find by pattern1 or pattern2 and exclude pattern3 you 
 must use ```pattern1,?pattern2,-pattern3```
+
+4. ```..``` used to construct enumerations
+
+	```1944..1945``` transforms to ```( field LIKE '%1944%') OR (field LIKE '%1945%')```

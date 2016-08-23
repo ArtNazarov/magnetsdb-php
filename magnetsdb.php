@@ -3,6 +3,22 @@
 mb_internal_encoding("UTF-8");
 mb_http_output ("UTF-8");
 
+function numeric_expression($field, $expression){
+	$values = explode("..", $expression);
+	$start = intval($values[0]);
+	$end = intval($values[1]);
+	$sql = "";
+	for ($i = $start; $i<$end; $i++){
+			if ($sql == ""){
+				$sql = " ( $field LIKE '%$i%' ) ";
+			}
+			else {
+				$sql = $sql . " OR ( $field LIKE '%$i%' ) ";
+			}
+		};
+  return $sql;
+}
+
 function nao_prefix($field, $word, $flag){
     
 	$nt = "";
@@ -25,8 +41,13 @@ function nao_prefix($field, $word, $flag){
 	};
 
 	$v = substr($word, $k);
-	
-	return " $oper ( $nt $field LIKE '%$v%' )";
+        
+        $result = " $oper ( $nt $field LIKE '%$v%' )";
+        
+        if (strpos($v, "..")>0){            
+            $result =  "$oper ( $nt ( ". numeric_expression($field, $v) . " ) ) ";
+        };
+	return  $result;
 }
 
 function like_expr_comb($field, $req){
@@ -77,19 +98,22 @@ return $html;
     function patterns_to_sql($patterns){
 			$sql = "";			
 			foreach ($patterns as $field => $pattern){
-				
+			
+                            if ($pattern !== ""){
+                            
                                 $expr = like_expr_comb($field, $pattern);
                             
-				if ($sql != "") {
+				if ($sql !== "") {
 						$sql = $sql . "AND ( $expr )";
 				}
 				else
 				{
 				$sql = "( $expr )";
 				};
-				
+                            };
 			};
-			
+                        
+                        
 			return $sql;
 			
     }
@@ -98,7 +122,7 @@ return $html;
         
     if (($patterns['caption'] == "")&&($patterns['category'] == "")&&($patterns['labels'] == "")){
         return array('total' => 0,
-              'fetch' => array()
+              'fetch' => array()                
               );
     };
     
@@ -137,7 +161,8 @@ return $html;
     };
     return
         array('total' => $cnt,
-              'fetch' => $arr);
+              'fetch' => $arr,
+              'query' => $query);
     }
     
     function pagination($total){
@@ -321,9 +346,9 @@ return $t;
             }
             case 'search' : {
                       
-                        $rows = request($patterns, $page);
+                        $rows = request($patterns, $page);                        
                         $view = onSearch($rows['fetch']); 
-                        $result = onIndex($patterns) . $view . pagination($rows['total']) . '<br/>Total:' . $rows['total'];
+                        $result = "<!-- " . $rows['query'] . " -->" . onIndex($patterns) . $view . pagination($rows['total']) . '<br/>Total:' . $rows['total'];
                         break;
                     
             };
