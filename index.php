@@ -72,12 +72,13 @@ $html = '<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=M
 $html = $html . '<link rel="stylesheet" href="https://code.getmdl.io/1.2.0/material.indigo-pink.min.css">';
 $html = $html . '<script defer src="https://code.getmdl.io/1.2.0/material.min.js"></script>';
 $html = $html . '<style> .mdl-data-table {white-space:pre-line !important;} #results {margin:0 auto; padding:10px;}</style>';
+$html .= $html . '<script defer src="/index.js"></script>';
 return $html;
 }
 
     function config(){
-    $host = "localhost:3306";  
-    $user = "";            
+    $host = "localhost";
+    $user = "";           
     $pass = "";        
     $db = "magnetsdb";         
     $port = 3306;              
@@ -281,6 +282,19 @@ for (var e in elems){
 </script>        
 EOT;
     }
+
+
+function load_categories(){
+	// SELECT DISTINCT(CATEGORY) FROM DATA ORDER BY CATEGORY INTO FILE CATEGORIES.TXT
+	$content = file_get_contents('CATEGORIES.TXT');
+	$lines =  explode("\n", $content);
+	$result = '<input id="cat" name="cat" type="text" value=""/>';
+foreach($lines as $line) {
+  $result .= '<p><input type="checkbox" value="'. $line.'"/>'.$line.'</p>';
+}
+
+return $result;
+}
     
 function mdl_template($title, $content){        
 $t = "";
@@ -293,6 +307,7 @@ $t = $t . '</header>';
 $t = $t . '  <div class="mdl-layout__drawer">';
 $t = $t . '    <span class="mdl-layout__title">MagnetsDB</span>';
 $t = $t . '    <nav class="mdl-navigation">';
+$t = $t . load_categories();
 $t = $t . '      <a class="mdl-navigation__link" href="https://github.com/artnazarov">Other versions</a>';      
     $t = $t . '</nav>';
   $t = $t . '</div>';
