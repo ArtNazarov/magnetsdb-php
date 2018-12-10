@@ -77,12 +77,12 @@ return $html;
 }
 
     function config(){
-    $host = "localhost";
-    $user = "";           
-    $pass = "";        
-    $db = "magnetsdb";         
+    $host = "hostname";  
+    $user = "username";            
+    $pass = "password";        
+    $db = "dbname";         
     $port = 3306;              
-    $limit = 10;
+    $limit = 50;
     return array(
             'host' => $host,
             'user' => $user,
@@ -223,6 +223,8 @@ method='POST'>";
             return "No results";
         };
         
+    
+        
         $html = "<div class='results'>";
         
         $table ='<table style="width:100%" class="mdl-data-table mdl-js-data-table mdl-data-table mdl-shadow--2dp">';
@@ -234,7 +236,7 @@ method='POST'>";
         $table = $table .'</tr>';
         $table = $table . '</thead>';
         $table = $table . '<tbody>';
-        
+        $hashes = "";
         $count = count($arr);
         foreach ($arr as $key => $elem){
             
@@ -242,6 +244,7 @@ method='POST'>";
             $caption = $elem['caption'];
             $labels = $elem['labels'];
             $category = $elem['category'];
+            $hashes = $hashes . "\r\n" . "magnet:?xt=urn:btih:". $magnet;
             
             
          
@@ -253,8 +256,35 @@ method='POST'>";
             $table = $table . $html_row;
         };
         $table = $table . "</tbody></table>";
+       
         $html = $html . $table . "</div>";
-        return $html;
+         $hashes = "<textarea cols='80' rows='10'>".$hashes."</textarea>";
+         
+         
+         
+           $tabs = <<<EOD
+    <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+
+  <div class="mdl-tabs__tab-bar">
+    <a href="#first-panel" class="mdl-tabs__tab is-active">Список</a>
+    <a href="#second-panel" class="mdl-tabs__tab">Хеши</a>
+
+  </div>
+
+
+  <div class="mdl-tabs__panel is-active" id="first-panel">
+    $html
+  </div>
+
+
+  <div class="mdl-tabs__panel" id="second-panel">
+    $hashes
+  </div>
+
+</div>       
+EOD;
+         
+        return $tabs;
     }
     
     function script($patterns){
