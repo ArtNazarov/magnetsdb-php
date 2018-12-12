@@ -1,5 +1,5 @@
 <?php 
-
+DEFINE("START",  microtime(true));
 mb_internal_encoding("UTF-8");
 mb_http_output ("UTF-8");
 
@@ -77,19 +77,22 @@ return $html;
 }
 
     function config(){
-    $host = "hostname";  
-    $user = "username";            
-    $pass = "password";        
-    $db = "dbname";         
+    $host = "localhost";  
+    $user = "root";            
+    $pass = "";        
+    $db = "magnetsdb";         
     $port = 3306;              
     $limit = 50;
+    $classicmode = false;
+    $classicmode ? DEFINE('QMODETXT', 'КЛАССИЧЕСКИЙ') : DEFINE('QMODETXT', 'ПОЛНОТЕКСТ');
     return array(
             'host' => $host,
             'user' => $user,
             'pass' => $pass,
             'db'   => $db,
             'port' => $port,
-            'limit' => $limit
+            'limit' => $limit,
+            'classicmode' => $classicmode 
         );
     }
     
@@ -128,7 +131,7 @@ return $html;
     };
     
     $cfg = config();
-    
+    $order_by = ' ORDER BY CAPTION ASC ';
     
     $limit = $cfg['limit'];
     if ($page < 1)     {$page = 1;};
@@ -140,6 +143,8 @@ return $html;
     
     mysqli_set_charset($connection, "utf8");
     
+    if ($cfg['classicmode']) {
+      
     $like_expr = patterns_to_sql($patterns);
     
     $query = "SELECT count(*) as cnt FROM data WHERE $like_expr;";
@@ -150,9 +155,30 @@ return $html;
     
     
      
-    $query = "SELECT * FROM data WHERE $like_expr LIMIT $limit OFFSET $offset;";
+    $query = "SELECT * FROM data WHERE $like_expr LIMIT $limit OFFSET $offset ;";
+    }
+    else
+    {
+      
+      $mcategory = $patterns['category'];
+      $mcaption = $patterns['caption'];
+      $mlabels = $patterns['labels'];
+      
+      if ($mcategory !== "") { $Category_Part = "MATCH(category) AGAINST('$mcategory')"; } else  { $Category_Part = 'TRUE'; };
+      if ($mcaption  !== "") { $Caption_Part = "MATCH(caption) AGAINST('$mcaption')"; } else { $Caption_Part = 'TRUE'; };
+      if ($mlabels !== "") { $Labels_Part = "MATCH(labels) AGAINST('$mlabels')"; } else  { $Labels_Part = 'TRUE'; };
+      $Request = '(' . $Category_Part . ') AND ('.$Caption_Part . ') AND ('. $Labels_Part .')'; // :)
+      
+    $queryCnt = "SELECT count(*) as cnt FROM data WHERE $Request";
     
+    $result = mysqli_query($connection, $queryCnt);  
+    $row = mysqli_fetch_assoc($result);
+    $cnt = $row['cnt'];
     
+    $query = "SELECT * from data WHERE " . $Request . "$order_by LIMIT $limit OFFSET $offset ";
+      
+    };
+    DEFINE('QUEDEBUG', $query. '/ CAT =' . $mcategory . '/CAP=' . $mcaption . '/LAB=' .$mlabels);
     
         
     $result = mysqli_query($connection, $query);  
@@ -398,8 +424,11 @@ return $t;
                     
             };
         };
+        $time = microtime(true) - START;
+        $result = $result . "<br/>Время выполнения:" . $time;
+        $result = $result . "<br/>ЗАПРОС:" . QUEDEBUG;
+        $result = $result . "<br/>РЕЖИМ:" . QMODETXT;
         echo document($patterns, $titles[$action], mdl_template($title, $result));
-
     }
     
    header('Content-Type: text/html; charset=utf-8');   
